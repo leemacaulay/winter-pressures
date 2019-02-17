@@ -5,7 +5,7 @@ library(ggplot2)
 library(stringr)
 library(bbplot)
 
-beds <- read_csv("output_data/beds20190207.csv")
+beds <- read_csv("output_data/beds20190214.csv")
 
 bar <- beds %>%
   filter(str_detect(provider, "North Cumbria") | str_detect(provider, "Morecambe Bay")) %>%
@@ -23,9 +23,10 @@ ggplot(bar, aes(x = date, y = value, fill = provider)) +
 line <- beds %>% 
   filter(str_detect(provider, "North Cumbria") | str_detect(provider, "Morecambe Bay")) %>% 
   filter(measure=="Occupancy rate") %>% 
-  ggplot(aes(x=date, y=value, facet=provider)) +
+  ggplot(aes(x=date, y=value, color=provider)) +
   geom_line(size = 1) +
   geom_hline(yintercept = 0, size = 1, colour="#333333") +
+  geom_vline(xintercept = as.numeric(as.Date("2019-02-03")), size = 1, colour="#333333", linetype = "dashed") +
   scale_colour_manual(values = c("#FAAB18", "#1380A1")) +
   bbc_style() +
   labs(title="Feeling the pressure",
@@ -38,8 +39,8 @@ line <- beds %>%
 line
 
 labelled <- line +
-  xlim(c(as.Date("2018-12-01", "%Y-%m-%d"), as.Date("2019-02-10", "%Y-%m-%d"))) +
-  geom_label(aes(x = as.Date("2019-02-03", "%Y-%m-%d"), y = 0.93, label = "94.3%"), 
+  xlim(c(as.Date("2018-12-01", "%Y-%m-%d"), as.Date("2019-02-17", "%Y-%m-%d"))) +
+  geom_label(aes(x = as.Date("2019-02-10", "%Y-%m-%d"), y = 0.97, label = "96.9%"), 
              hjust = 0, 
              vjust = 0.5, 
              colour = "#FAAB18", 
@@ -47,7 +48,7 @@ labelled <- line +
              label.size = NA, 
              family="Helvetica", 
              size = 6) +
-  geom_label(aes(x = as.Date("2019-02-03", "%Y-%m-%d"), y = 0.97, label = "96.6%"), 
+  geom_label(aes(x = as.Date("2019-02-10", "%Y-%m-%d"), y = 0.92, label = "94%"), 
              hjust = 0, 
              vjust = 0.5, 
              colour = "#1380A1", 
@@ -74,7 +75,7 @@ labelled <- line +
 
 finalise_plot(plot_name = labelled,
               source = "Source: NHS England",
-              save_filepath = "rmd/occupied_cumbria.png",
+              save_filepath = "rmd/occupied_cumbria_20190210.png",
               width_pixels = 750,
               height_pixels = 550)
 

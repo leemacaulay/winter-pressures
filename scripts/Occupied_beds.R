@@ -7,8 +7,8 @@ library(dplyr)
 ## https://www.england.nhs.uk/statistics/statistical-work-areas/winter-daily-sitreps/winter-daily-sitrep-2018-19-data/
 
 tmp <- tempfile(fileext = ".xlsx")
-httr::GET(url = "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2019/02/Winter-data-timeseries-20190207.xlsx",
-          httr::write_disk(tmp))
+
+httr::GET(url = "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2019/02/Winter-data-timeseries-20190214.xlsx", httr::write_disk(tmp))
 
 ## Adapted from this - https://howisonlab.github.io/datawrangling/Handling_multi_indexes.html#a-tidyverse-solution
 
@@ -19,7 +19,7 @@ bed_headers[1,] <- as.character(convertToDate(bed_headers[1,]))
 # fill only works down or up, so have to transpose headers
 long_bed_headers <- data.frame(t(bed_headers))
 # remove unneeded rows
-long_bed_headers <- long_bed_headers[5:319,]
+long_bed_headers <- long_bed_headers[5:length(long_bed_headers$X1),]
 # Add column names down the columns
 long_bed_headers <- fill(long_bed_headers,1:2)
 # back to vertical
@@ -32,6 +32,9 @@ column_labels <- bed_headers %>% summarize_all(str_c, collapse = "--")
 # pull them into one character vector, add remaining columns
 headers = c("region","X1","code","provider", unname(unlist(column_labels[1,])))
 
+# read the rest of the file
+beds <- read_excel(tmp, sheet = "G&A beds", col_names = headers, na="-", skip = 15)
+
 # tidy up the finished data frame
 beds_long <- beds %>%
   gather(variable, value, -provider, -code, -region, -X1) %>% # gather all measures, omit rest of columns
@@ -40,7 +43,7 @@ beds_long <- beds %>%
   drop_na(value) %>% 
   select(provider, region, code, date, measure, value)
 
-write_csv(beds_long, "output_data/beds20190207.csv")
+write_csv(beds_long, "output_data/beds20190214.csv")
 
 beds <- read_csv("output_data/beds20190207.csv")
   
